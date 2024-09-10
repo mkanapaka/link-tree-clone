@@ -13,17 +13,13 @@
         <div class="text-center">
             <img id="profile-picture" src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="Profile Picture" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
             <h1 class="text-2xl font-bold mb-4">Your Name</h1>
-            <form action="{{ url_for('upload_profile_picture') }}" method="POST" enctype="multipart/form-data" class="mb-4">
+            <form id="profile-picture-form" action="{{ url_for('upload_profile_picture') }}" method="POST" enctype="multipart/form-data" class="mb-4">
                 <div class="flex items-center justify-center">
-                    <label for="profile_picture" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-l">
-                        Choose File
+                    <label for="profile_picture" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        Choose and Upload Picture
                     </label>
                     <input id="profile_picture" type="file" name="profile_picture" accept="image/*" class="hidden">
-                    <span id="file-name" class="bg-gray-100 border border-gray-300 py-2 px-4 rounded-r w-40 truncate">No file chosen</span>
                 </div>
-                <button type="submit" class="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded w-full">
-                    Upload Picture
-                </button>
             </form>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -80,10 +76,6 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
         feather.replace();
-        document.getElementById('profile_picture').addEventListener('change', function(e) {
-            var fileName = e.target.files[0].name;
-            document.getElementById('file-name').textContent = fileName;
-        });
     </script>
 </body>
 </html>

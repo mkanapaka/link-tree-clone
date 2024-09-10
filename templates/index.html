@@ -12,15 +12,16 @@
     <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <div class="text-center">
             <img id="profile-picture" src="{{ url_for('static', filename='uploads/' + profile_picture) }}" alt="Profile Picture" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover">
-            <h1 class="text-2xl font-bold mb-4">Your Name</h1>
-            <form id="profile-picture-form" action="{{ url_for('upload_profile_picture') }}" method="POST" enctype="multipart/form-data" class="mb-4">
-                <div class="flex items-center justify-center">
-                    <label for="profile_picture" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                        Choose and Upload Picture
-                    </label>
-                    <input id="profile_picture" type="file" name="profile_picture" accept="image/*" class="hidden">
-                </div>
-            </form>
+            {% if edit_mode %}
+                <form id="profile-picture-form" action="{{ url_for('upload_profile_picture') }}" method="POST" enctype="multipart/form-data" class="mb-4">
+                    <div class="flex items-center justify-center">
+                        <label for="profile_picture" class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            Choose and Upload Picture
+                        </label>
+                        <input id="profile_picture" type="file" name="profile_picture" accept="image/*" class="hidden">
+                    </div>
+                </form>
+            {% endif %}
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -30,22 +31,55 @@
                     {% endfor %}
                 {% endif %}
             {% endwith %}
-            <form action="{{ url_for('change_theme') }}" method="POST" class="mb-4">
-                <div class="relative">
-                    <select name="theme" onchange="this.form.submit()" class="block appearance-none w-full bg-gray-100 border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                        {% for theme, _ in themes.items() %}
-                            <option value="{{ theme }}" {% if theme == current_theme %}selected{% endif %}>
-                                {{ theme.capitalize() }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
+            {% if edit_mode %}
+                <form action="{{ url_for('update_profile') }}" method="POST" class="space-y-4">
+                    <div>
+                        <label for="user_name" class="block text-sm font-medium text-gray-700">Your Name</label>
+                        <input type="text" id="user_name" name="user_name" value="{{ user_name }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     </div>
-                </div>
-            </form>
+                    <div>
+                        <label for="twitter_url" class="block text-sm font-medium text-gray-700">Twitter URL</label>
+                        <input type="url" id="twitter_url" name="twitter_url" value="{{ social_links[0].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="instagram_url" class="block text-sm font-medium text-gray-700">Instagram URL</label>
+                        <input type="url" id="instagram_url" name="instagram_url" value="{{ social_links[1].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn URL</label>
+                        <input type="url" id="linkedin_url" name="linkedin_url" value="{{ social_links[2].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded">
+                        Update Profile
+                    </button>
+                </form>
+                <form action="{{ url_for('change_theme') }}" method="POST" class="mt-4">
+                    <div class="relative">
+                        <select name="theme" onchange="this.form.submit()" class="block appearance-none w-full bg-gray-100 border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
+                            {% for theme, _ in themes.items() %}
+                                <option value="{{ theme }}" {% if theme == current_theme %}selected{% endif %}>
+                                    {{ theme.capitalize() }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </form>
+                <form action="{{ url_for('claim_link') }}" method="POST" class="mt-4">
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        Claim your Link
+                    </button>
+                </form>
+            {% else %}
+                <h1 class="text-2xl font-bold mb-4">{{ user_name }}</h1>
+                {% if unique_id %}
+                    <p class="mb-4">Your shareable link: <a href="{{ url_for('shared_profile', unique_id=unique_id, _external=True) }}" class="text-blue-500 hover:underline">{{ url_for('shared_profile', unique_id=unique_id, _external=True) }}</a></p>
+                {% endif %}
+            {% endif %}
         </div>
         <div class="space-y-4 mb-4">
             {% for link in social_links %}
@@ -55,21 +89,13 @@
             </a>
             {% endfor %}
         </div>
-        <form action="{{ url_for('update_social_links') }}" method="POST" class="space-y-4">
-            <div>
-                <label for="twitter_url" class="block text-sm font-medium text-gray-700">Twitter URL</label>
-                <input type="url" id="twitter_url" name="twitter_url" value="{{ social_links[0].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            </div>
-            <div>
-                <label for="instagram_url" class="block text-sm font-medium text-gray-700">Instagram URL</label>
-                <input type="url" id="instagram_url" name="instagram_url" value="{{ social_links[1].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            </div>
-            <div>
-                <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn URL</label>
-                <input type="url" id="linkedin_url" name="linkedin_url" value="{{ social_links[2].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            </div>
-            <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded">
-                Update Social Links
+        <form action="{{ url_for('toggle_edit_mode') }}" method="POST" class="mt-4">
+            <button type="submit" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                {% if edit_mode %}
+                    Finish Editing
+                {% else %}
+                    Edit Profile
+                {% endif %}
             </button>
         </form>
     </div>

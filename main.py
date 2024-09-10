@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+import uuid
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -18,6 +19,9 @@ THEMES = {
     'forest': 'bg-gradient-to-r from-green-400 via-lime-500 to-emerald-500'
 }
 
+# Store user profiles
+user_profiles = {}
+
 @app.route("/")
 def index():
     # Get social media links from session or use default values
@@ -28,7 +32,10 @@ def index():
     ]
     current_theme = session.get('theme', 'default')
     profile_picture = session.get('profile_picture', 'default.jpg')
-    return render_template("index.html", social_links=social_links, themes=THEMES, current_theme=current_theme, profile_picture=profile_picture)
+    edit_mode = session.get('edit_mode', True)  # Default to edit mode
+    user_name = session.get('user_name', 'Your Name')  # Get user name from session or use default
+    unique_id = session.get('unique_id')
+    return render_template("index.html", social_links=social_links, themes=THEMES, current_theme=current_theme, profile_picture=profile_picture, edit_mode=edit_mode, user_name=user_name, unique_id=unique_id)
 
 @app.route("/upload", methods=['POST'])
 def upload_profile_picture():
@@ -61,12 +68,47 @@ def change_theme():
         session['theme'] = theme
     return redirect(url_for('index'))
 
-@app.route("/update_social_links", methods=['POST'])
-def update_social_links():
+@app.route("/update_profile", methods=['POST'])
+def update_profile():
+    session['user_name'] = request.form.get('user_name')
     session['twitter_url'] = request.form.get('twitter_url')
     session['instagram_url'] = request.form.get('instagram_url')
     session['linkedin_url'] = request.form.get('linkedin_url')
+    flash('Profile updated successfully', 'success')
     return redirect(url_for('index'))
+
+@app.route("/toggle_edit_mode", methods=['POST'])
+def toggle_edit_mode():
+    session['edit_mode'] = not session.get('edit_mode', True)
+    return redirect(url_for('index'))
+
+@app.route("/claim_link", methods=['POST'])
+def claim_link():
+    unique_id = str(uuid.uuid4())[:8]  # Generate a short unique ID
+    session['unique_id'] = unique_id
+    
+    # Store the current user profile
+    user_profiles[unique_id] = {
+        'user_name': session.get('user_name', 'Your Name'),
+        'profile_picture': session.get('profile_picture', 'default.jpg'),
+        'theme': session.get('theme', 'default'),
+        'social_links': [
+            {"name": "Twitter", "url": session.get('twitter_url', 'https://twitter.com/yourusername'), "icon": "feather:twitter"},
+            {"name": "Instagram", "url": session.get('instagram_url', 'https://instagram.com/yourusername'), "icon": "feather:instagram"},
+            {"name": "LinkedIn", "url": session.get('linkedin_url', 'https://linkedin.com/in/yourusername'), "icon": "feather:linkedin"},
+        ]
+    }
+    
+    flash(f'Your unique link has been created: {request.host_url}u/{unique_id}', 'success')
+    return redirect(url_for('index'))
+
+@app.route("/u/<unique_id>")
+def shared_profile(unique_id):
+    profile = user_profiles.get(unique_id)
+    if profile:
+        return render_template("shared_profile.html", profile=profile, themes=THEMES)
+    else:
+        abort(404)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

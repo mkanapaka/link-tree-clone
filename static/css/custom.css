@@ -1,0 +1,9 @@
+/* Add any custom styles here */
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+#profile-picture {
+    border: 4px solid white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

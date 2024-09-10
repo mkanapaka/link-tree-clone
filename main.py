@@ -1,13 +1,22 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max-limit
+app.secret_key = 'your_secret_key'  # Set a secret key for session management
 
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Available themes
+THEMES = {
+    'default': 'bg-gradient-to-r from-purple-400 via-pink-500 to-red-500',
+    'ocean': 'bg-gradient-to-r from-blue-400 via-teal-500 to-green-500',
+    'sunset': 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500',
+    'forest': 'bg-gradient-to-r from-green-400 via-lime-500 to-emerald-500'
+}
 
 @app.route("/")
 def index():
@@ -18,7 +27,8 @@ def index():
         {"name": "LinkedIn", "url": "https://linkedin.com/in/yourusername", "icon": "feather:linkedin"},
         {"name": "GitHub", "url": "https://github.com/yourusername", "icon": "feather:github"},
     ]
-    return render_template("index.html", social_links=social_links)
+    current_theme = session.get('theme', 'default')
+    return render_template("index.html", social_links=social_links, themes=THEMES, current_theme=current_theme)
 
 @app.route("/upload", methods=['POST'])
 def upload_profile_picture():
@@ -34,6 +44,13 @@ def upload_profile_picture():
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'profile.jpg'))
         return redirect(url_for('index'))
+
+@app.route("/change_theme", methods=['POST'])
+def change_theme():
+    theme = request.form.get('theme')
+    if theme in THEMES:
+        session['theme'] = theme
+    return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

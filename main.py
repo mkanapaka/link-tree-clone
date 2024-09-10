@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -27,21 +27,31 @@ def index():
         {"name": "LinkedIn", "url": session.get('linkedin_url', 'https://linkedin.com/in/yourusername'), "icon": "feather:linkedin"},
     ]
     current_theme = session.get('theme', 'default')
-    return render_template("index.html", social_links=social_links, themes=THEMES, current_theme=current_theme)
+    profile_picture = session.get('profile_picture', 'default.jpg')
+    return render_template("index.html", social_links=social_links, themes=THEMES, current_theme=current_theme, profile_picture=profile_picture)
 
 @app.route("/upload", methods=['POST'])
 def upload_profile_picture():
     if 'profile_picture' not in request.files:
+        flash('No file part', 'error')
         return redirect(url_for('index'))
     
     file = request.files['profile_picture']
     
     if file.filename == '':
+        flash('No selected file', 'error')
         return redirect(url_for('index'))
     
     if file:
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'profile.jpg'))
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            file.save(file_path)
+            session['profile_picture'] = filename
+            flash('Profile picture uploaded successfully', 'success')
+        except Exception as e:
+            app.logger.error(f"Error saving file: {str(e)}")
+            flash('Error uploading file', 'error')
         return redirect(url_for('index'))
 
 @app.route("/change_theme", methods=['POST'])

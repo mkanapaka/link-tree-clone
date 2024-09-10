@@ -37,6 +37,18 @@
                         <label for="user_name" class="block text-sm font-medium text-gray-700">Your Name</label>
                         <input type="text" id="user_name" name="user_name" value="{{ user_name }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                     </div>
+                    <div>
+                        <label for="twitter_url" class="block text-sm font-medium text-gray-700">Twitter URL</label>
+                        <input type="url" id="twitter_url" name="twitter_url" value="{{ social_links[0].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="instagram_url" class="block text-sm font-medium text-gray-700">Instagram URL</label>
+                        <input type="url" id="instagram_url" name="instagram_url" value="{{ social_links[1].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
+                    <div>
+                        <label for="linkedin_url" class="block text-sm font-medium text-gray-700">LinkedIn URL</label>
+                        <input type="url" id="linkedin_url" name="linkedin_url" value="{{ social_links[2].url }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    </div>
                     <button type="submit" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded">
                         Update Profile
                     </button>
@@ -68,6 +80,14 @@
                     <p class="mb-4">Your shareable link: <a href="{{ url_for('shared_profile', unique_id=unique_id, _external=True) }}" class="text-blue-500 hover:underline">{{ url_for('shared_profile', unique_id=unique_id, _external=True) }}</a></p>
                 {% endif %}
             {% endif %}
+        </div>
+        <div class="space-y-4 mb-4">
+            {% for link in social_links %}
+            <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="block bg-gray-100 hover:bg-gray-200 transition duration-300 rounded-lg p-4 flex items-center">
+                <i data-feather="{{ link.icon }}" class="mr-4"></i>
+                <span>{{ link.name }}</span>
+            </a>
+            {% endfor %}
         </div>
         <form action="{{ url_for('toggle_edit_mode') }}" method="POST" class="mt-4">
             <button type="submit" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">

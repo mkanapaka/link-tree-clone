@@ -69,16 +69,15 @@
                         </div>
                     </div>
                 </form>
+                <form action="{{ url_for('claim_link') }}" method="POST" class="mt-4">
+                    <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        Claim your Link
+                    </button>
+                </form>
             {% else %}
                 <h1 class="text-2xl font-bold mb-4">{{ user_name }}</h1>
                 {% if unique_id %}
                     <p class="mb-4">Your shareable link: <a href="{{ url_for('shared_profile', unique_id=unique_id, _external=True) }}" class="text-blue-500 hover:underline">{{ url_for('shared_profile', unique_id=unique_id, _external=True) }}</a></p>
-                {% else %}
-                    <form action="{{ url_for('claim_link') }}" method="POST" class="mt-4">
-                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-                            Claim your Link
-                        </button>
-                    </form>
                 {% endif %}
             {% endif %}
         </div>

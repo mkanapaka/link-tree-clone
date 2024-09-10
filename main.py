@@ -20,12 +20,11 @@ THEMES = {
 
 @app.route("/")
 def index():
-    # List of social media links
+    # Get social media links from session or use default values
     social_links = [
-        {"name": "Twitter", "url": "https://twitter.com/yourusername", "icon": "feather:twitter"},
-        {"name": "Instagram", "url": "https://instagram.com/yourusername", "icon": "feather:instagram"},
-        {"name": "LinkedIn", "url": "https://linkedin.com/in/yourusername", "icon": "feather:linkedin"},
-        {"name": "GitHub", "url": "https://github.com/yourusername", "icon": "feather:github"},
+        {"name": "Twitter", "url": session.get('twitter_url', 'https://twitter.com/yourusername'), "icon": "feather:twitter"},
+        {"name": "Instagram", "url": session.get('instagram_url', 'https://instagram.com/yourusername'), "icon": "feather:instagram"},
+        {"name": "LinkedIn", "url": session.get('linkedin_url', 'https://linkedin.com/in/yourusername'), "icon": "feather:linkedin"},
     ]
     current_theme = session.get('theme', 'default')
     return render_template("index.html", social_links=social_links, themes=THEMES, current_theme=current_theme)
@@ -50,6 +49,13 @@ def change_theme():
     theme = request.form.get('theme')
     if theme in THEMES:
         session['theme'] = theme
+    return redirect(url_for('index'))
+
+@app.route("/update_social_links", methods=['POST'])
+def update_social_links():
+    session['twitter_url'] = request.form.get('twitter_url')
+    session['instagram_url'] = request.form.get('instagram_url')
+    session['linkedin_url'] = request.form.get('linkedin_url')
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
